@@ -6,6 +6,13 @@ from PIL import Image
 import glob
 from donkeycar.utils import rgb2gray
 
+#ROS2用
+import rclpy
+from rclpy.node import Node
+from sensor_msgs.msg import Image 
+from cv_bridge import CvBridge
+import cv2
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
@@ -16,6 +23,34 @@ class BaseCamera:
 
     def run_threaded(self):
         return self.frame
+
+class Ros2Camera(BaseCamera):
+    def listener_callback(self, msg):
+        bridge = CvBridge()
+        img = bridge.imgmsg_to_cv2(msg, "bgr8")
+        img = cv2.resize(img, dsize=(160, 120))
+        self.frame = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
+        #bridge = CvBridge()
+        #orig = bridge.imgmsg_to_cv2(msg, "bgr8")
+        #cv2.imshow('image', orig)
+        #cv2.waitKey(1)
+
+    def __init__(self,args=None):
+        self.frame = None
+        bridge = CvBridge()
+        rclpy.init(args=args)
+        self.node = rclpy.create_node('minimal_subscriber')
+        subscription = self.node.create_subscription(
+            Image, 'image_raw', self.listener_callback, 10)
+        subscription  # prevent unused variable warning
+
+    def run(self):
+        return self.frame
+
+    def update(self):
+        rclpy.spin(self.node)
+        subscriber.destroy_node()
+        rclpy.shutdown()
 
 class PiCamera(BaseCamera):
     def __init__(self, image_w=160, image_h=120, image_d=3, framerate=20, vflip=False, hflip=False):

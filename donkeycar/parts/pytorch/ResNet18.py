@@ -7,14 +7,16 @@ import numpy as np
 import torch.optim as optim
 from donkeycar.parts.pytorch.torch_data import get_default_transform
 
+from torchmetrics import MeanSquaredError
 
 def load_resnet18(num_classes=2):
     # Load the pre-trained model (on ImageNet)
-    model = models.resnet18(pretrained=True)
+    #model = models.resnet18(pretrained=True)
+    model = models.resnet18(pretrained=False)
 
     # Don't allow model feature extraction layers to be modified
-    for layer in model.parameters():
-        layer.requires_grad = False
+    #for layer in model.parameters():
+    #    layer.requires_grad = False
 
     # Change the classifier layer
     model.fc = nn.Linear(512, 2)
@@ -22,6 +24,9 @@ def load_resnet18(num_classes=2):
     for param in model.fc.parameters():
         param.requires_grad = True
 
+    #model = model.eval()
+    #model.load_state_dict(torch.load('model.pth',map_location=torch.device('cpu')), strict=False)
+    
     return model
 
 
@@ -33,10 +38,12 @@ class ResNet18(pl.LightningModule):
         self.example_input_array = torch.rand(input_shape)
 
         # Metrics
-        self.train_mse = pl.metrics.MeanSquaredError()
-        self.valid_mse = pl.metrics.MeanSquaredError()
+        self.train_mse = MeanSquaredError()
+        self.valid_mse = MeanSquaredError()
 
         self.model = load_resnet18(num_classes=output_size[0])
+
+
 
         self.inference_transform = get_default_transform(for_inference=True)
 
@@ -50,8 +57,10 @@ class ResNet18(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         x, y = batch
         logits = self.model(x)
-
+        
         loss = F.l1_loss(logits, y)
+        #loss = F.mse_loss(logits,y)
+        
         self.loss_history.append(loss)
         self.log("train_loss", loss)
 
@@ -65,6 +74,7 @@ class ResNet18(pl.LightningModule):
         x, y = batch
         logits = self.forward(x)
         loss = F.l1_loss(logits, y)
+        #loss = F.mse_loss(logits,y)
 
         self.log("val_loss", loss)
 

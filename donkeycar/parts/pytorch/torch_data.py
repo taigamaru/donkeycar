@@ -1,3 +1,6 @@
+
+from abc import ABC, abstractmethod
+
 # PyTorch
 import torch
 from torch.utils.data import IterableDataset, DataLoader
@@ -92,8 +95,8 @@ class TorchTubDataset(IterableDataset):
                                                 y_transform=y_transform)
         return pipeline
 
-    def __len__(self):
-        return len(self.sequence)
+#    def __len__(self):
+#        return len(self.sequence)
 
     def __iter__(self):
         return iter(self.pipeline)

@@ -25,7 +25,7 @@ DRIVE_LOOP_HZ = 20      # the vehicle loop will pause if faster than this speed.
 MAX_LOOPS = None        # the vehicle loop can abort after this many iterations, when given a positive integer.
 
 #CAMERA
-CAMERA_TYPE = "PICAM"   # (PICAM|WEBCAM|CVCAM|CSIC|V4L|D435|MOCK|IMAGE_LIST)
+CAMERA_TYPE = "ROS2CAM"   # (PICAM|WEBCAM|CVCAM|CSIC|V4L|D435|MOCK|IMAGE_LIST|ROS2CAM)
 IMAGE_W = 160
 IMAGE_H = 120
 IMAGE_DEPTH = 3         # default RGB=3, make 1 for mono
@@ -67,8 +67,9 @@ SSD1306_RESOLUTION = 1 # 1 = 128x32; 2 = 128x64
 #                                  and HBridge for a drive motor.
 # (deprecated) "PIGPIO_PWM" uses Raspberrys internal PWM
 # (deprecated) "I2C_SERVO" uses PCA9685 servo controller to control a steering servo and an ESC, as in a standard RC car
+# "ROS2_DRIVE" send cmd_vel to ROS2
 #
-DRIVE_TRAIN_TYPE = "PWM_STEERING_THROTTLE"
+DRIVE_TRAIN_TYPE = "ROS2_DRIVE"
 
 #
 # PWM_STEERING_THROTTLE

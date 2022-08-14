@@ -162,6 +162,9 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
         elif cfg.CAMERA_TYPE == "LEOPARD":
             from donkeycar.parts.leopard_imaging import LICamera
             cam = LICamera(width=cfg.IMAGE_W, height=cfg.IMAGE_H, fps=cfg.CAMERA_FRAMERATE)
+        elif cfg.CAMERA_TYPE == "ROS2CAM":
+            from donkeycar.parts.camera import Ros2Camera
+            cam = Ros2Camera()
         else:
             raise(Exception("Unkown camera type: %s" % cfg.CAMERA_TYPE))
 
@@ -436,14 +439,19 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
         model_reload_cb = None
 
         if '.h5' in model_path or '.trt' in model_path or '.tflite' in \
-                model_path or '.savedmodel' in model_path or '.pth':
+                model_path or '.savedmodel' in model_path or '.pth' in model_path:
             # load the whole model with weigths, etc
+            kl = dk.utils.get_model_by_type(model_type, cfg)
             load_model(kl, model_path)
 
             def reload_model(filename):
                 load_model(kl, filename)
 
             model_reload_cb = reload_model
+        elif '.ckpt' in model_path:
+           print("load model:resnet18")
+           from donkeycar.parts.pytorch.torch_utils import get_model_by_type
+           kl = model = get_model_by_type(model_type, cfg, checkpoint_path=model_path) 
 
         elif '.json' in model_path:
             # when we have a .json extension
@@ -764,6 +772,13 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
                       cfg.VESC_STEERING_OFFSET
                     )
         V.add(vesc, inputs=['angle', 'throttle'])
+    
+    elif cfg.DRIVE_TRAIN_TYPE == "ROS2_DRIVE":
+        #ROS2 Publish
+        from donkeycar.parts.ros2 import RosTwistPubisher
+        ctr = RosTwistPubisher(node_name='speed',topic_name='cmd_vel')
+        V.add(ctr,inputs=['throttle','angle'])
+
 
     # OLED setup
     if cfg.USE_SSD1306_128_32:

@@ -1,5 +1,5 @@
 import os
-
+import torch
 
 def get_model_by_type(model_type, cfg, checkpoint_path=None):
     '''
@@ -19,13 +19,27 @@ def get_model_by_type(model_type, cfg, checkpoint_path=None):
         # the model is pre-trained on ImageNet
         input_shape = (cfg.BATCH_SIZE, 3, 224, 224)
         model = ResNet18(input_shape=input_shape)
+    elif model_type == "linear":
+        from donkeycar.parts.pytorch.linear import Linear
+        input_shape = (cfg.BATCH_SIZE, 3, 224, 224)
+        model = Linear(input_shape=input_shape)
     else:
         raise Exception("Unknown model type {:}, supported types are "
                         "resnet18"
                         .format(model_type))
 
     if checkpoint_path:
+        #print("Loading model from checkpoint {}".format(checkpoint_path))
+        #model.load_from_checkpoint(checkpoint_path)
+
+
+        model.eval()
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         print("Loading model from checkpoint {}".format(checkpoint_path))
-        model.load_from_checkpoint(checkpoint_path)
+        #model.load_from_checkpoint(checkpoint_path)
+        checkpoint = torch.load(checkpoint_path,map_location=device)
+        model.load_state_dict(checkpoint['state_dict'])
+        #model.load_state_dict(checkpoint)
+
 
     return model
