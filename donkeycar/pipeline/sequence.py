@@ -42,7 +42,7 @@ class TubSeqIterator(SizedIterator[TubRecord]):
     next = __next__
 
 
-class TfmIterator(Generic[R, XOut, YOut],  SizedIterator[Tuple[XOut, YOut]]):
+class TfmIterator(  SizedIterator[Tuple[XOut, YOut]],Generic[R, XOut, YOut]):
     def __init__(self,
                  iterable: Iterable[R],
                  x_transform: Callable[[R], XOut],
@@ -65,7 +65,7 @@ class TfmIterator(Generic[R, XOut, YOut],  SizedIterator[Tuple[XOut, YOut]]):
         return next(self.iterator)
 
 
-class TfmTupleIterator(Generic[X, Y, XOut, YOut],  SizedIterator[Tuple[XOut, YOut]]):
+class TfmTupleIterator(  SizedIterator[Tuple[XOut, YOut]],Generic[X, Y, XOut, YOut]):
     def __init__(self,
                  iterable: Iterable[Tuple[X, Y]],
                  x_transform: Callable[[X], XOut],
@@ -88,7 +88,7 @@ class TfmTupleIterator(Generic[X, Y, XOut, YOut],  SizedIterator[Tuple[XOut, YOu
         return next(self.iterator)
 
 
-class BaseTfmIterator_(Generic[XOut, YOut],  SizedIterator[Tuple[XOut, YOut]]):
+class BaseTfmIterator_(  SizedIterator[Tuple[XOut, YOut]],Generic[XOut, YOut]):
     '''
     A basic transforming iterator.
     Do no use this class directly.
