@@ -10,6 +10,8 @@ from donkeycar.parts.pytorch.torch_data import get_default_transform
 from torchmetrics import MeanSquaredError
 
 def load_resnet18(num_classes=2):
+
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     # Load the pre-trained model (on ImageNet)
     #model = models.resnet18(pretrained=True)
     model = models.resnet18(pretrained=False)
@@ -27,7 +29,7 @@ def load_resnet18(num_classes=2):
     #model = model.eval()
     #model.load_state_dict(torch.load('model.pth',map_location=torch.device('cpu')), strict=False)
     
-    return model
+    return model.to(device)
 
 
 class ResNet18(pl.LightningModule):
@@ -98,9 +100,11 @@ class ResNet18(pl.LightningModule):
         """
         from PIL import Image
 
+        device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+
         pil_image = Image.fromarray(img_arr)
         tensor_image = self.inference_transform(pil_image)
-        tensor_image = tensor_image.unsqueeze(0)
+        tensor_image = tensor_image.unsqueeze(0).to(device)
 
         # Result is (1, 2)
         result = self.forward(tensor_image)
